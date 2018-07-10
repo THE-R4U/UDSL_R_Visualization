@@ -314,3 +314,80 @@ image(x, y, volcano, col = heat.colors(20, alpha = 1), axes = FALSE)
 contour(x, y, volcano, levels = seq(90, 200, by = 5), 
         add = T, col = "white")
 ```
+
+```{r}
+x <- 10 * (1:nrow(volcano))
+y <- 10 * (1:ncol(volcano))
+image(x, y, volcano, col = topo.colors(20, alpha = 1), axes = FALSE)
+contour(x, y, volcano, levels = seq(90, 200, by = 5), 
+        add = T, col = "white")
+```
+
+* rainbow colors는 hsv color system을 기반으로 함
+* n (색상의 수), s(채도), v(명도), start(h의 시작값), end(h의 끝값), alpha(투명도)
+* 시작값과 끝값의 범위 : 0 ~ 1
+
+```{r}
+rainbow(5, s = 0.4, v = 0.3, start = 0, end = 0.05, alpha = 1)
+```
+
+
+### RColorBrewer package
+
+* 이 패키지를 사용하면 R에서 제공되는 palette들을 사용할 수 있음
+* sequential patterns : Blues, BuGn, BuPu, ..., YIOrBr, YIOrRd
+
+
+```{r}
+if(!require(RColorBrewer)){install.packages("RColorBrewer"); library(RColorBrewer)}
+
+brewer.pal(4, "Blues")
+```
+
+
+```{r}
+x <- 10 * (1:nrow(volcano))
+y <- 10 * (1:ncol(volcano))
+image(x, y, volcano, col = brewer.pal(9, "Blues"), axes = FALSE)
+```
+
+
+* Diverging palletes : BrBG, PiYG, ..., RdYIGn, Spectral
+* 가운데 색상들은 밝고, 시작과 끝의 색상은 어둡다
+
+```{r}
+brewer.pal(4, "BrBG")
+```
+
+* display.brewe.all()
+* RColorBrewer package에서 사용할 수 있는 palette들을 보여 줌
+
+```{r}
+display.brewer.all()
+```
+
+### colorspace package
+
+* Color patterns hcl, hsv color system을 기반으로 생성
+* diverge_hcv, diverge_hsl, terrain_hcl, terrain_hcl, sequential_hcl, rainbow_hcl, ...
+
+```{r}
+if(!require(colorspace)){install.packages("colorspace"); library(colorspace)}
+
+diverge_hcl(7, h = c(246, 40, c = 96, l = c(65, 90)))
+```
+
+```{r color_space}
+pal = choose_palette()
+```
+
+* Color Palette들을 만들기 위한 대화형 Tool
+* 옵션은 RColorBrewer 에서 참고
+* 색상, 채도, 명도는 기본으로 선택되어 있음
+* hcl 또는 hsv 에 대한 옵션으로 선택할 수 있음
+
+```{r}
+pal <- choose_palette()
+my_col = pal(50)
+my_col
+```
