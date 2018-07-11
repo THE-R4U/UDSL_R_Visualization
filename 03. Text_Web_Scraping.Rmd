@@ -1,0 +1,92 @@
+---
+title: "03. Text Function & Web Scriping"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Text Function
+
+### 문자열 처리 함수
+
+#### paste 함수
+
+#### grep 함수
+```{r}
+grep()
+```
+
+#### nchar 함수
+```{r}
+nchar(c("South Pole", "한글 문자열", NA))
+```
+
+#### substr 함수
+```{r}
+substr("Equator", start=2, stop=4)
+substr("한글 문자열 추출", start=2, stop=4)
+substring("한글 문자열 추출", first=2)
+```
+
+
+#### strsplit 함수
+```{r}
+strsplit("06-16-2018", split="-")
+strsplit("06*16*2018", split="*t")
+
+```
+
+date
+strsplit)(dae)
+
+
+#### strsplit 함수
+```{r}
+text = "6 * 16 * 2016"
+strsplit(text, split="-")
+strsplit("06*16*2018", split="*"")
+```
+
+#### regexpr 함수
+```{r}
+text = "6 * 16 * 2016"
+strsplit(text, split="-")
+strsplit("06*16*2018", split="*"")
+```
+
+
+
+## 정규표현식
+
+```{r}
+strsplit("감자, 고구마, 양파 그리고 파이어볼", split = "(,)|(그리고)")
+```
+
+시작
+```{r}
+grep(pattern = "^(감자)", x = "감자는 고구마를 좋아해")
+grep(pattern = "^(감자)", x = "고구마는 감자를 좋아해")
+```
+
+끝
+```{r}
+grep(pattern = "(좋아해)$", x = "감자는 고구마를 좋아해")
+grep(pattern = "(좋아해)$", x = "고구마는 감자를 좋아해")
+```
+
+Any
+```{r}
+```
+
+
+
+
+## stringr package
+
+### 함수 사용법
+
+str_sub: substr, substring
+
+

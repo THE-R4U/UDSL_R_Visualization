@@ -1,0 +1,407 @@
+---
+title: "02. R-Data Processing"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Data Preocessing by Index
+
+### Indexing 및 Filtering을 이용한 데이터 정리
+
+* Survey 데이터를 부르고 열 이름 확인
+
+```{r dataload}
+library(MASS)
+library(psych)
+library(Hmisc)
+library(xtable)
+
+data(survey)
+```
+
+
+사용하는 패키지
+- plotrix
+- vioplot
+- vcd 
+
+Barplot
+```{r barplot}
+counts = table(state.region)
+counts
+barplot(counts, main = 'Simple Bar Chart', xlab = 'region', ylab = 'freq')
+```
+
+
+```{r matcars_barplot}
+mtcars
+str(mtcars)
+head(mtcars)
+
+freq.cyl = table(mtcars$cyl)
+cyl.name = c("4 cyl", "6 cyl", "8 cyl")
+barplot(freq.cyl, main = "simple bar chart", col ="orange", names.arg = cyl.name)
+```
+
+
+Pie Chart
+- 범주형 변수의 시각화에 파이 차트를 많이 사용
+- 파이차트는 pie() 함수를 사용
+- 파이차트 위에 범주레벨과 비율을 표시하기 위해 lable 옵션 사용
+```{r piechart}
+cyl.name2 = paste0(cyl.name, "(", freq.cyl, "%)")
+pie(freq.cyl, lables = cyl.name2, col = rainbow(length(freq.cyl)), main = 'pie chart')
+
+if(!require(plotrix)){install.packages('plotrix'); library(plotrix)}
+pie3D(freq.cyl, lables = cyl.name2, explode = 0.1, main = '3D Pie Chart')
+```
+
+
+3D Pie Chart
+- plotrix() : 3차원 형태의 Pie Chart 생성
+```{r 3dpiechart}
+if(!require(plotrix)){install.packages('plotrix'); library(plotrix)}
+pie3D(freq.cyl, lables = cyl.name2, explode = 0.1, main = '3D Pie Chart')
+```
+
+
+Fan Plot
+- fan.plot() : 범주의 레벨 간 비교가 용이함
+```{r fanplot}
+fan.plot(freq.cyl, labels = cyl.name2, main = "Fan Plot")
+```
+
+
+## Frequency of mutivariate variables
+
+### Introduction
+
+* 두개 이상의 범주를 가진 데이터에서 빈도를 분석
+  + 예: (형액형, 성별), (투약엽, 병증의 개선 정도)
+* 빈도 테이블의 작성 시각화
+  + 빈도테이블의 작성 : xtab 함수 이용
+  + 시각화 : barplot(), spine() 함수의 이용
+
+* 데이터: 류마티스 관절염에 대한 의학 실험 데이터
+  + ID, 처치(Treatment), 성별(Sex), 나이(Age), 개선정도(Improved)
+  
+```{r freq_table}
+if(!require(vcd)){install.packages('vcd'); library(vcd)}
+head(Arthritis, n = 3)
+my.table <- xtabs( ~ Treatment + Improved, data = Arthritis)
+my.table
+```
+
+- 빈도분석 : 처치여부와 개선정도의 빈도 분석
+  + ~Treatment + Improved
+  + xtab() 함수는 table 변수보다 직관적으로 빈도분석 툴을 제공
+  
+```{r freq_table_barplot}
+barplot(my.table, xlab = "Improved", ylab = "Frequency", 
+        legend.text = TRUE, col = c("green", "red"))
+```
+
+- 처치 여부에 따른 개선정도의 차이를 확인하기 위해 데이터의 행과 열을 바꿈
+  + ~Treatment + Improved
+  + xtab() 함수는 table 변수보다 직관적으로 빈도분석 툴을 제공
+  
+```{r freq_table_barplot2}
+barplot(my.table, xlab = "Improved", ylab = "Frequency", 
+        legend.text = TRUE, col = c("green", "red"))
+```
+
+
+
+## Continuous Variables and Visualization
+
+### 소개
+
+* 연속형 자료를 요약하고 시각화
+  + 연속형 자료의 예: 키, 몸무게, 주가...
+  + 연속형 자료의 요약치 : 평균, 중앙값, 분위수...
+  + 연속형 자료의 시각화 도구 : boxplot, 히스토그램, 바이올린 플롯
+
+```{r cv_barplot}
+x = rnorm(100)
+barplot(x, main = "Box Plot", col = "lightblue")
+```  
+
+### Histogram
+```{r hist1}
+x = faithful$waiting
+hist(faithful$waiting, nclass = 8)
+```
+
+* hist() 함수는 히스토그램을 생성한다.
+  + 히스토그램의 형태는 계급구간을 어떻게 설정하는가에 따라 달라 짐
+  + 주로 nclass에 개수를 입력하여 계급구간을 설정한다
+  + 정확한 계급구간은 break 옵션을 통해 정의
+  + 히스토그램의 높이를 확률로 표시하기 위해 probability = T를 사용
+* 히스토그램은 연속형 자료의 분포를 보여주는 시각도구
+
+```{r hist2}
+x = faithful$waiting
+hist(faithful$waiting, breaks = seq(min(x), max(x), 
+                                    length = 10), probability = T)
+```
+
+* density() 함수를 이용해서 확률밀도함수를 추가할 수 있다.
+
+```{r hist3}
+x = faithful$waiting
+hist(faithful$waiting, nclas = 10, probability = T)
+lines(density(x), col = "red", lwd = 2)
+```
+
+### Violin Plot
+
+* violin plot은 boxplot의 장점과 histogram의 장점을 결갑한 시각화
+
+```{r violin_plot}
+if(!require(vioplot)){install.packages("vioplot"); library(vioplot)}
+
+x = rpois(1000, lambda = 3)
+vioplot(x, col = 'lightblue')
+```
+
+## Visualization for multivatiate Variables
+
+### Multiple Boxplot
+```{r multiple_boxplot}
+attach(mtcars)
+boxplot(mpg~cyl, data = mtcars, names = c('4 cyl', '6 cyl', '8 cyl'),
+        main = 'MPG dist by cylinder')
+```
+
+### Multiple Histogram
+```{r multiple_histogram}
+hist(mpg[cyl==4], xlab = 'MPG', main = 'MPG dist by Cyl',
+     xlim = c(5, 40), ylim = c(0, 10), col = 'lightblue',
+     nclass = trunc(sqrt(length(mpg[cyl==4]))))
+hist(mpg[cyl==6], xlab = 'MPG', main = 'MPG dist by Cyl',
+     xlim = c(5, 40), ylim = c(0, 10), col = 'orange',
+     nclass = trunc(sqrt(length(mpg[cyl==6]))), add = T)
+hist(mpg[cyl==8], xlab = 'MPG', main = 'MPG dist by Cyl',
+     xlim = c(5, 40), ylim = c(0, 10), col = 'lightblue',
+     nclass = trunc(sqrt(length(mpg[cyl==8]))), add = T)
+```
+
+### Multiple Histogram 2
+
+* par의 mfrow 옵견을 이용하여 3개의 히스토그램을 수직으로 배열
+* xlim 을 맟춰야 데이터이 중심비교가 용이 함
+
+```{r multiple_histogram2}
+opar <- par(no.readonly = TRUE)
+par(mfrow = c(3,1))
+hist(mpg[cyl==4], xlab = 'MPG', main = 'MPG dist by Cyl',
+     xlim = c(5, 40), ylim = c(0, 10), col = 'lightblue',
+     nclass = trunc(sqrt(length(mpg[cyl==4]))))
+hist(mpg[cyl==6], xlab = 'MPG', main = 'MPG dist by Cyl',
+     xlim = c(5, 40), ylim = c(0, 10), col = 'orange',
+     nclass = trunc(sqrt(length(mpg[cyl==6]))))
+hist(mpg[cyl==8], xlab = 'MPG', main = 'MPG dist by Cyl',
+     xlim = c(5, 40), ylim = c(0, 10), col = 'lightblue',
+     nclass = trunc(sqrt(length(mpg[cyl==8]))))
+par(opar)
+```
+
+### Multiple Densities
+
+* 확률밀도함수를 한번에 표현할 수 있음
+
+```{r multiple_densities}
+plot(density(mpg[cyl==4]), xlab = "MPG", main = "MPG dist by cylinder",
+     xlim = c(5, 40), ylim = c(0., 0.26))
+
+lines(density(mpg[cyl==6]), col = "red", lty = 2)
+lines(density(mpg[cyl==8]), col = "blue", lty = 3)
+legend("topright", paste(c(4,6,8), "cylinder"),
+       col = c("black", "red", "blue"),
+       lty = c(1,2,3), lwd = 3, bty = "n")
+```
+
+
+> 실습
+
+* 부모님의 안전벨트 착용 유무와 자녀의 안전벨트 착용 유무의 비교 예제
+
+```{r}
+tmp <- c("buckled", "unbuckled")
+belt <- matrix(c(58, 2, 8, 16), ncol = 2,
+               dimnames = list(parent = tmp, child = tmp))
+belt
+```
+
+* 부모의 안전벨트 착용이 자식간의 안전벨트 착용에 영향을 준다는 것을 시각화
+```{r}
+barplot(t(belt), main = "Tacked Bar Chart for child seat-belt usage",
+        xlab = "parent", ylab = "Frequency", legend.text = T, 
+        col = c("green", "red"))
+```
+
+### R Colors
+
+* 16진법 표기글 사용 (0~9, A~F)
+* 기본적으로 빨간색, 초록색, 파란색을 지정하며, 16진법으로 2개씩 표현 (즉, 기봄색상 별로 각각 256개로 표현할 수 있음(#rrggbb))
+* 256 x 256 x 256 = 2^24개의 색상 표현 : 24 bit colors
+* 또한, 24 bit colors에 투명도(256 level)를 추가하면 32 bit color system이 됨 (#rrggbbaa)
+
+#### colors()
+
+* Basic Color
+```{r}
+head(colors())
+tail(colors())
+
+mycol <- colors()
+plot(1:80, y=rep(1,80), col = mycol[1:80], cex = 2, pch = 20, ylim = c(0,1))
+points(1:80, y=rep(0.5,80), col = mycol[81:160], cex = 2, pch = 20)
+points(1:80, y=rep(0,80), col = mycol[161:240], cex = 2, pch = 20)
+```
+
+
+```{r}
+mycol <- colors()
+image(matrix(1:25^2, 25, 25), col = mycol)
+```
+
+### RGB Function
+
+* rgb(red, green, blue, maxColorValue, alpha)
+* red, greem blue : 기본으로 0 ~ 1 사이의 값을 사용
+* macColorValue = 255 으로 세팅하면 0 ~ 255 사이의 값으로 사용할 수 있음
+* alpha : opaciry(투명도)
+
+```{r}
+rgb(10, 4, 23, maxColorValue = 255, alpha = 10)
+col2rgb("lightblue")
+```
+
+
+### Hue Color System
+
+* 색상들은 콘 모양으로 볼 수 있음
+* 바깥쪽으로 갈수록 채도가 높은 색
+* 위쪽으로 갈수록 밝기는 증가 함
+
+#### hcl function
+
+* hcl(h, c, l, alpah)
+* h: colors(색상), c: saturation(채도), l: brightness(밝기), alpha: Opaity(투명도)
+* h [0, 360]: 0~120(red), 120-240(green), 240-360(blue)
+* i [0, 100]: alpah [0, 1]
+* c의 범위는 h와 l의 값에 따라 변한다
+
+```{r}
+hcl(h = 0, c = 35, l = 85, alpha = 0.1)
+```
+
+#### hsv function
+
+* hsv(h, c, v, alpah)
+* h: colors(색상), c: saturation(채도), v: brightness(밝기), alpha: Opaity(투명도)
+* h, s, v, alpha [0,1]
+
+```{r}
+hsv(0.3, 0.5, 0.1, alpha = 0.4)
+```
+
+
+### grDevices, colorRamps Packages
+
+* cm.colors, topo.colors, terrain.colors, heat.colors, rainbow
+* cm, topo,errain, heat : n(색상의 수), alphar(투명도)
+
+```{r}
+#heat.colors(4, alpah = 0.1)
+topo.colors(4, alpha = 0.1)
+```
+
+```{r}
+x <- 10 * (1:nrow(volcano))
+y <- 10 * (1:ncol(volcano))
+image(x, y, volcano, col = heat.colors(20, alpha = 1), axes = FALSE)
+contour(x, y, volcano, levels = seq(90, 200, by = 5), 
+        add = T, col = "white")
+```
+
+```{r}
+x <- 10 * (1:nrow(volcano))
+y <- 10 * (1:ncol(volcano))
+image(x, y, volcano, col = topo.colors(20, alpha = 1), axes = FALSE)
+contour(x, y, volcano, levels = seq(90, 200, by = 5), 
+        add = T, col = "white")
+```
+
+* rainbow colors는 hsv color system을 기반으로 함
+* n (색상의 수), s(채도), v(명도), start(h의 시작값), end(h의 끝값), alpha(투명도)
+* 시작값과 끝값의 범위 : 0 ~ 1
+
+```{r}
+rainbow(5, s = 0.4, v = 0.3, start = 0, end = 0.05, alpha = 1)
+```
+
+
+### RColorBrewer package
+
+* 이 패키지를 사용하면 R에서 제공되는 palette들을 사용할 수 있음
+* sequential patterns : Blues, BuGn, BuPu, ..., YIOrBr, YIOrRd
+
+
+```{r}
+if(!require(RColorBrewer)){install.packages("RColorBrewer"); library(RColorBrewer)}
+
+brewer.pal(4, "Blues")
+```
+
+
+```{r}
+x <- 10 * (1:nrow(volcano))
+y <- 10 * (1:ncol(volcano))
+image(x, y, volcano, col = brewer.pal(9, "Blues"), axes = FALSE)
+```
+
+
+* Diverging palletes : BrBG, PiYG, ..., RdYIGn, Spectral
+* 가운데 색상들은 밝고, 시작과 끝의 색상은 어둡다
+
+```{r}
+brewer.pal(4, "BrBG")
+```
+
+* display.brewe.all()
+* RColorBrewer package에서 사용할 수 있는 palette들을 보여 줌
+
+```{r}
+display.brewer.all()
+```
+
+### colorspace package
+
+* Color patterns hcl, hsv color system을 기반으로 생성
+* diverge_hcv, diverge_hsl, terrain_hcl, terrain_hcl, sequential_hcl, rainbow_hcl, ...
+
+```{r}
+if(!require(colorspace)){install.packages("colorspace"); library(colorspace)}
+
+diverge_hcl(7, h = c(246, 40, c = 96, l = c(65, 90)))
+```
+
+```{r color_space}
+pal = choose_palette()
+```
+
+* Color Palette들을 만들기 위한 대화형 Tool
+* 옵션은 RColorBrewer 에서 참고
+* 색상, 채도, 명도는 기본으로 선택되어 있음
+* hcl 또는 hsv 에 대한 옵션으로 선택할 수 있음
+
+```{r}
+pal <- choose_palette()
+my_col = pal(50)
+my_col
+```
